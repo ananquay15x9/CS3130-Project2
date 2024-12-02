@@ -1,7 +1,7 @@
 import time
 import sys
 
-def fibonacci_recursive(n, simulate=False):
+def fibonacci_recursive(n, simulate=False): #this is the first algorithm
     if n == 0:
         if simulate:  #testing the inefficiency of n0
             fib = 0
@@ -16,7 +16,7 @@ def fibonacci_recursive(n, simulate=False):
     
     return fibonacci_recursive(n-1) + fibonacci_recursive(n-2)
 
-def fibonacci_memoized(n, simulate=False):
+def fibonacci_memoized(n, simulate=False): #this is the second algorithm
     memo = {0: 0, 1: 1}
     
     def fib(n):
@@ -27,6 +27,40 @@ def fibonacci_memoized(n, simulate=False):
     
     return fib(n) if n >= 0 else 0
 
+def fibonacci_matrix(n): #this is the third algorithm 
+    if n < 0:
+        return 0
+    if n == 0:
+        return 0
+    if n == 1:
+        return 1
+    
+    def matrix_mult(A, B):
+        return [[
+            A[0][0]*B[0][0] + A[0][1]*B[1][0],
+            A[0][0]*B[0][1] + A[0][1]*B[1][1],
+        ], [
+            A[1][0]*B[0][0] + A[1][1]*B[1][0],
+            A[1][0]*B[0][1] + A[1][1]*B[1][1],
+        ]]
+        
+    def matrix_power(matrix, n):
+        result = [[1, 0], [0, 1]]
+        base = matrix
+        
+        while n > 0:
+            if n % 2 == 1:
+                result = matrix_mult(result, base)
+            base = matrix_mult(base, base) #squaring technique
+            n //=2
+            
+        return result
+    
+    F = [[0,1], [1,1]]
+    result_matrix = matrix_power(F, n)
+    
+    return result_matrix[1][0]
+
 def main():
     sys.setrecursionlimit(20000)
     
@@ -34,16 +68,17 @@ def main():
         print("\nFibonacci Calculator")
         print("1. Recursive Algorithm (slower, limited to smaller numbers)")
         print("2. Dynamic Algorithm (faster, can handle larger numbers)")
-        print("3. Exit")
+        print("3. Matrix Multiplication Alorithm (most efficient)")
+        print("4. Exit")
         
         try:
             choice = input("\nSelect your choice:  ")
             
-            if choice == "3":
+            if choice == "4":
                 print("Exiting...")
                 break
             
-            if choice not in ("1", "2"):
+            if choice not in ("1", "2", "3"):
                 print("Invalid choice. Please try again.")
                 continue
             
@@ -60,10 +95,15 @@ def main():
                 result = fibonacci_recursive(n, simulate=(n == 0))
                 execution_time = time.time() - start_time
                 time_unit = "seconds"
-            else:
+            elif choice == "2":
                 result = fibonacci_memoized(n, simulate=(n == 0))
                 execution_time = (time.time() - start_time) * 1000
                 time_unit = "milliseconds"
+            else:
+                result = fibonacci_matrix(n)
+                execution_time = (time.time() - start_time) * 1000
+                time_unit = "milliseconds"
+                
             print("\n=====================================")    
             print(f"Fibonacci({n}) = {result}")
             print(f"Execution time: {execution_time:.6f} {time_unit}")
@@ -73,27 +113,12 @@ def main():
             print("Please enter a valid number.")
         except RecursionError:
             print("The number is too big, try a smaller one.")
-    """   
-    try:
-        n = int(input("Enter the Fibonacci number you want to calculate (Fn): "))
-        
-        start_time = time.time()
-        result = fibonacci_recursive(n, simulate=(n == 0))  # this will compute n0 about 20-30s
-        end_time = time.time()
-        
-        execution_time = end_time - start_time
-        print(f"\nFibonacci({n}) = {result}")
-        print(f"Execution time: {execution_time:.6f} seconds")
-        
-    except ValueError:
-        print("Please enter a valid number.")
-    except RecursionError:
-        print("The number is too big, try a smaller one.")
-        """
+
 if __name__ == "__main__":
     main()
     
-    """_The execution time starts to get longer if n is larger than 40.
+    """For the first algorithm, 
+        the execution time starts to get longer if n is larger than 40.
         n = 42 takes 37 seconds to compute.
         n = 41 takes 22 seconds to compute
         n = 40 takes 15 seconds to compute
